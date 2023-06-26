@@ -1,0 +1,13 @@
+# Kick message.
+# Supported placeholders: %name% (player name)
+kick.message: "Authorization error!"
+
+# The time for which the player must send the correct token.
+# Supported placeholders: %ping% (player ping)
+# Supported math operators: +, -, *, /, (, ), ^, sqrt, sin, cos, tan.
+kick.delay: "%ping% + 110"
+
+# Tokens. example:
+# NikSne: "Ai"
+# WolfCamera: "Auf"
+# MoonyOwlet: "Hogwarts"

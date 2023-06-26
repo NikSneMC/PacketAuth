@@ -1,0 +1,5 @@
+name: PacketAuth
+version: '${version}'
+main: com.niksne.packetauth.bungee.PacketAuth
+author: NikSne
+description: Authorization system for servers without online mode

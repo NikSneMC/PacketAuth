@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "packetauthmod",
+  "version": "${version}",
+
+  "name": "Packet Auth",
+  "description": "Authorization system for servers without online mode",
+  "authors": [
+    "NikSne"
+  ],
+  "contact": {
+    "email": "niksne.mc@yandex.ru",
+    "sources": "https://github.com/NikSneMC/PacketAuth",
+    "issues": "https://github.com/NikSneMC/PacketAuth/issues"
+  },
+
+  "license": "All-Rights-Reserved",
+  "icon": "assets/packetauth/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.niksne.packetauth.client.PacketAuth"
+
+    ],
+    "server": [
+      "com.niksne.packetauth.server.PacketAuth"
+    ]
+  },
+  "mixins": [
+    "PacketAuth.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "minecraft": ">=1.20 <=1.20.1",
+    "java": ">=17"
+  },
+  "suggests": {
+    "modmenu": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "discord": "https://discord.com/invite/bT9r2ByxDV"
+      },
+      "update_checker": false
+    }
+  }
+}

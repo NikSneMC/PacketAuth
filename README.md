@@ -9,4 +9,4 @@ Packet Auth is a project that provides additional security for your server by au
 - Secure authentication with custom plugin messages
 - Customizable configuration options
 
-Enjoy your secure server with PacketAuth!
+Enjoy your secure server with Packet Auth!

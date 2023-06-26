@@ -7,7 +7,6 @@ PacketAuth is a project that provides additional security for your server by aut
 ## Features
 
 - Secure authentication with custom plugin messages
-- Adjustable queue system for unauthenticated players
 - Customizable configuration options
 
 Enjoy your secure server with PacketAuth!

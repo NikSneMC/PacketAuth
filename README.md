@@ -1,4 +1,4 @@
-<a href='https://discord.gg/W87YPkWw8t' target="_blank"><img alt='Discord' src='https://img.shields.io/badge/Discord-100000?style=for-the-badge&logo=Discord&logoColor=white&labelColor=0037FF&color=black'/></a>
+<a href='https://discord.com/invite/bT9r2ByxDV' target="_blank"><img alt='Discord' src='https://img.shields.io/badge/Discord-100000?style=for-the-badge&logo=Discord&logoColor=white&labelColor=0037FF&color=black'/></a>
 
 # PacketAuth
 

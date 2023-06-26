@@ -2,7 +2,7 @@
 
 # PacketAuth
 
-PacketAuth is a Minecraft plugin and mod that provides additional security for your server by authenticating players with a token sent via a custom plugin message.
+PacketAuth is a project that provides additional security for your server by authenticating players with a token sent via a custom plugin message.
 
 ## Features
 

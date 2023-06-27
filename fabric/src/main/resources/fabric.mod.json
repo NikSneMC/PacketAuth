@@ -41,7 +41,8 @@
   "custom": {
     "modmenu": {
       "links": {
-        "discord": "https://discord.com/invite/bT9r2ByxDV"
+        "discord": "https://discord.com/invite/bT9r2ByxDV",
+        "modrinth": "https://modrinth.com/mod/packetauth"
       },
       "update_checker": false
     }

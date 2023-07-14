@@ -5,8 +5,7 @@
 </summary>
 
 > - [Fabric/Quilt](Installation.md#fabricquilt) 
-> - [Bukkit/Spigot/Paper/Purpur](Installation.md#bukkitspigotpaperpurpurfolia)
-> - [BungeeCord/WaterFall](Installation.md#bungeecordwaterfall)
+> - [Bukkit/Spigot/Paper/Purpur](Installation.md#bukkitspigotpaperpurpurfoliabungeecordwaterfall))
 </details>
 <details>
 <summary>

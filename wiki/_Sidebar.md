@@ -4,8 +4,9 @@
     <a href="Installation.md">Installation</a>
 </summary>
 
-> - [Client](Installation.md#client) 
-> - [Server]()
+> - [Fabric/Quilt](Installation.md#fabricquilt) 
+> - [Bukkit/Spigot/Paper/Purpur](Installation.md#bukkitspigotpaperpurpurfolia)
+> - [BungeeCord/WaterFall](Installation.md#bungeecordwaterfall)
 </details>
 <details>
 <summary>

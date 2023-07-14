@@ -12,6 +12,3 @@ Make sure you put the [Packet Auth plugin](https://modrinth.com/plugin/packetaut
 ### Notes: 
 1. **You need [mod](#fabricquilt) installed on your client when using the BungeeCord/WaterFall version of Packet Auth on the proxy**
 2. **You should not install the plugin on servers on the network!**
-
-
-

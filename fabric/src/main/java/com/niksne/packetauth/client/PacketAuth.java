@@ -22,7 +22,6 @@ public class PacketAuth implements ClientModInitializer {
 			for (String ip : handler.getConnection().getAddress().toString().split("/")) {
 				String token = getToken(ip);
 				if (token != null) {
-					System.out.println("Sending token (" + token + ") to server!");
 					ClientPlayNetworking.send(PacketAuth.AUTH_PACKET_ID, new PacketByteBuf(Unpooled.wrappedBuffer(token.getBytes())));
 				}
 			}

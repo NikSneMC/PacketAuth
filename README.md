@@ -1,4 +1,4 @@
-<a href='https://discord.com/invite/bT9r2ByxDV' target="_blank"><img alt='Discord' src='https://img.shields.io/badge/My Discord Server-100000?style=for-the-badge&logo=Discord&logoColor=white&labelColor=0037FF&color=black'/></a>
+<a href='https://discord.gg/hGxQgrYTD3' target="_blank"><img alt='Discord' src='https://img.shields.io/badge/My Discord Server-100000?style=for-the-badge&logo=Discord&logoColor=white&labelColor=0037FF&color=black'/></a>
 <a href='https://modrinth.com/plugin/packetauth' target="_blank"><img alt='Modrinth Page' src='https://img.shields.io/badge/Modrinth%20Page-100000?style=for-the-badge&logo=Modrinth&logoColor=white&labelColor=0037FF&color=black'/></a>
 <a href='https://hangar.papermc.io/NikSne/PacketAuth' target="_blank"><img alt='Hangar Page' src='https://img.shields.io/badge/Hangar%20Page-100000?style=for-the-badge&logo=Hangar&logoColor=white&labelColor=0037FF&color=black'/></a>
 

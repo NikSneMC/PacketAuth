@@ -16,7 +16,7 @@ import static com.niksne.packetauth.Utils.eval;
 
 public final class PacketAuth extends Plugin implements Listener {
     public ConfigManager config;
-    private final Set<ProxiedPlayer> verified = new HashSet<>();
+    private final Set<String> verified = new HashSet<>();
 
     @Override
     public void onEnable() {
@@ -31,8 +31,8 @@ public final class PacketAuth extends Plugin implements Listener {
         ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
         config.reload();
         String token = config.getString(player.getName());
-        if (token == null) { return; }
-        if (new String(event.getData(), StandardCharsets.UTF_8).equals(token)) { verified.add(player); }
+        if (token == null) return;
+        if (new String(event.getData(), StandardCharsets.UTF_8).equals(token)) verified.add(player.getName());
     }
 
     @EventHandler
@@ -40,9 +40,8 @@ public final class PacketAuth extends Plugin implements Listener {
         ProxiedPlayer player = getProxy().getPlayer(event.getConnection().getName());
         config.reload();
         getProxy().getScheduler().schedule(this, () -> {
-            if (player.isConnected() && !verified.contains(player)) {
-                player.disconnect(config.getString("kick.message"));
-            } else verified.remove(player);
+            if (player.isConnected() && !verified.contains(player.getName())) player.disconnect(config.getString("kick.message"));
+            else verified.remove(player.getName());
         }, (long) eval(config.getString("kick.delay").replace("%ping%", String.valueOf(player.getPing()))), TimeUnit.MILLISECONDS);
     }
 }

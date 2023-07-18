@@ -16,7 +16,7 @@ public class Utils {
                 boolean success = serversDatFile.createNewFile();
                 if (!success) { return; }
                 NbtCompound config = new NbtCompound();
-                config.putString("kick-delay", "%ping% + 110");
+                config.putString("kick-delay", "%ping% + 120");
                 config.putString("kick-message", "Authorization Error!");
                 config.put("tokens", new NbtCompound());
                 NbtIo.write(config, serversDatFile);

@@ -24,7 +24,7 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
 
     private static final Identifier AUTH_PACKET_ID = new Identifier("packetauth:auth");
 
-    private final Set<ServerPlayerEntity> verified = new HashSet<>();
+    private final Set<String> verified = new HashSet<>();
 
     @Override
     public void onInitializeServer() {
@@ -37,9 +37,8 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
             ScheduledExecutorService service  = Executors.newScheduledThreadPool(1);
             service.scheduleWithFixedDelay(
                     () -> {
-                        if (!player.isDisconnected() && !verified.contains(player)) {
-                            player.networkHandler.disconnect(Text.of(getKickMsg().replace("%name%", player.getEntityName())));
-                        } else verified.remove(player);
+                        if (!player.isDisconnected() && !verified.contains(player.getEntityName())) player.networkHandler.disconnect(Text.of(getKickMsg().replace("%name%", player.getEntityName())));
+                        else verified.remove(player.getEntityName());
                         service.shutdown();
                         }, delay, delay, TimeUnit.MILLISECONDS
             );
@@ -50,8 +49,7 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
     @Override
     public void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         String token = getToken(player.getEntityName());
-        if (token == null) { return; }
-        if (new String(buf.getWrittenBytes(), StandardCharsets.UTF_8).equals(token)) { verified.add(player); }
-        System.out.println(verified);
+        if (token == null) return;
+        if (new String(buf.getWrittenBytes(), StandardCharsets.UTF_8).equals(token)) verified.add(player.getEntityName());
     }
 }

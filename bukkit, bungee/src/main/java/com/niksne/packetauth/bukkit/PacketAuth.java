@@ -17,7 +17,7 @@ import java.util.Set;
 import static com.niksne.packetauth.Utils.eval;
 
 public final class PacketAuth extends JavaPlugin implements Listener, PluginMessageListener {
-    private final Set<Player> verified = new HashSet<>();
+    private final Set<String> verified = new HashSet<>();
 
     @Override
     public void onEnable() {
@@ -28,11 +28,11 @@ public final class PacketAuth extends JavaPlugin implements Listener, PluginMess
 
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-        if (!channel.equals("packetauth:auth")) { return; }
+        if (!channel.equals("packetauth:auth")) return;
         reloadConfig();
         String token = getConfig().getString(player.getName());
-        if (token == null) { return; }
-        if (new String(message, StandardCharsets.UTF_8).equals(token)) { verified.add(player); }
+        if (token == null) return;
+        if (new String(message, StandardCharsets.UTF_8).equals(token)) verified.add(player.getName());
     }
 
     @EventHandler
@@ -43,9 +43,8 @@ public final class PacketAuth extends JavaPlugin implements Listener, PluginMess
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (player.isOnline() && !verified.contains(player)) {
-                    player.kickPlayer(cfg.getString("kick.message"));
-                } else verified.remove(player);
+                if (player.isOnline() && !verified.contains(player.getName())) player.kickPlayer(cfg.getString("kick.message"));
+                else verified.remove(player.getName());
             }
         }.runTaskLater(this, (long) eval(cfg.getString("kick.delay").replace("%ping%", String.valueOf(player.getPing()))));
     }

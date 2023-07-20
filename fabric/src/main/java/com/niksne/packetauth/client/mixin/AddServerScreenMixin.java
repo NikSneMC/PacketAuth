@@ -8,6 +8,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,6 +43,7 @@ public abstract class AddServerScreenMixin extends Screen {
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/CyclingButtonWidget;builder(Ljava/util/function/Function;)Lnet/minecraft/client/gui/widget/CyclingButtonWidget$Builder;"), method = "init")
     private void init1(CallbackInfo ci) {
         this.tokenField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 146, 200, 20, Text.translatable("addServer.enterToken"));
+        this.tokenField.setMaxLength(4096);
         this.tokenField.setText(getToken(this.server.address));
         this.addSelectableChild(this.tokenField);
     }
@@ -53,7 +55,7 @@ public abstract class AddServerScreenMixin extends Screen {
                 button.setY(button.getY() + 18 + 24);
             }
             if (element instanceof ButtonWidget button) {
-                button.setY(button.getY() + 24);
+                button.setY(button.getY() + 18 + 24);
             }
         }
     }
@@ -73,7 +75,7 @@ public abstract class AddServerScreenMixin extends Screen {
         saveToken(this.server.address, this.tokenField.getText());
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;render(Lnet/minecraft/client/gui/DrawContext;IIF)V"), method = "render")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawCenteredTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;III)V"), method = "render")
     public void render1(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         context.drawTextWithShadow(this.textRenderer, ENTER_TOKEN_TEXT, this.width / 2 - 100, 135, 10526880);
     }

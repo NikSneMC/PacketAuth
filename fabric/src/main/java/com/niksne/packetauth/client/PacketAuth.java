@@ -21,7 +21,7 @@ public class PacketAuth implements ClientModInitializer {
 		generateConfig();
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			String ip = handler.getConnection().getAddress().toString();
-			String token = getToken(ip.substring(0, ip.lastIndexOf(':')).substring(0, ip.indexOf("/")));
+			String token = getToken(String.format("%s%s", ip.substring(0, ip.indexOf("/")), ip.substring(ip.indexOf(":"))));
 			if (token == null) return;
 			ClientPlayNetworking.send(PacketAuth.AUTH_PACKET_ID, new PacketByteBuf(Unpooled.wrappedBuffer(token.getBytes())));
 		});

@@ -71,7 +71,9 @@ public abstract class AddServerScreenMixin extends Screen {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;getText()Ljava/lang/String;"), method = "addAndClose")
     private void save(CallbackInfo ci) {
-        saveToken(this.server.address, this.tokenField.getText());
+        String ip = this.server.address;
+        if (!ip.contains(":")) ip += ":25565";
+        saveToken(ip, this.tokenField.getText());
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawCenteredTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;III)V"), method = "render")

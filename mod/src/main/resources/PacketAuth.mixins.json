@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.niksne.packetauth.client.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "AddServerScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

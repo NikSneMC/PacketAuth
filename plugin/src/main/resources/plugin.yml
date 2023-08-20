@@ -1,0 +1,9 @@
+name: PacketAuth
+version: '${version}'
+main: com.niksne.packetauth.bukkit.PacketAuth
+api-version: 1.18
+prefix: PacketAuth
+load: STARTUP
+authors: [NikSne]
+description: Authorization system for servers without online mode
+website: https://modrinth.com/mod/packetauth

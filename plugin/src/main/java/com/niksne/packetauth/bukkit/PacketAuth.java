@@ -11,12 +11,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public final class PacketAuth extends JavaPlugin implements Listener, PluginMessageListener {
     private static ConfigManager config;
@@ -130,28 +132,30 @@ public final class PacketAuth extends JavaPlugin implements Listener, PluginMess
         }
 
         PacketAuth plugin = this;
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (player.isOnline()) {
-                    if (outdated.contains(player.getName())) player.kickPlayer(config.getString("kick.outdated").replace("%version%", "1.6").replace("&", "§"));
-                    else {
-                        if (autogenEnabled && !tokens.containsKey(player.getName())) {
-                            String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
-                            tokens.putString(player.getName(), token);
-                            player.sendPluginMessage(plugin, "packetauth:token", token.getBytes());
-                        } else if (autogenEnabled && MySQLEnabled && !db.hasPlayer(player.getName())) {
-                            String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
-                            db.saveToken(player.getName(), token);
-                            player.sendPluginMessage(plugin, "packetauth:token", token.getBytes());
-                        } else {
-                            if (!verified.contains(player.getName())) player.kickPlayer(config.getString("kick.message").replace("%name%", player.getName()).replace("&", "§"));
-                            else verified.remove(player.getName());
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+        long delay = (long) Utils.eval(config.getString("kick.delay").replace("%ping%", String.valueOf(player.getPing())));
+        service.scheduleWithFixedDelay(
+                () -> {
+                    if (player.isOnline()) {
+                        if (outdated.contains(player.getName())) player.kickPlayer(config.getString("kick.outdated").replace("%version%", "1.6").replace("&", "§"));
+                        else {
+                            if (autogenEnabled && !tokens.containsKey(player.getName())) {
+                                String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
+                                tokens.putString(player.getName(), token);
+                                player.sendPluginMessage(plugin, "packetauth:token", token.getBytes());
+                            } else if (autogenEnabled && MySQLEnabled && !db.hasPlayer(player.getName())) {
+                                String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
+                                db.saveToken(player.getName(), token);
+                                player.sendPluginMessage(plugin, "packetauth:token", token.getBytes());
+                            } else {
+                                if (!verified.contains(player.getName())) player.kickPlayer(config.getString("kick.message").replace("%name%", player.getName()).replace("&", "§"));
+                                else verified.remove(player.getName());
+                            }
                         }
+                        outdated.remove(player.getName());
                     }
-                    outdated.remove(player.getName());
-                }
-            }
-        }.runTaskLater(this, (long) Utils.eval(config.getString("kick.delay").replace("%ping%", String.valueOf(player.getPing()))));
+                    service.shutdown();
+                }, delay, delay, TimeUnit.MILLISECONDS
+        );
     }
 }

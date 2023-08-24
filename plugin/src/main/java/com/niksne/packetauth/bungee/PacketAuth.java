@@ -15,9 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import static com.niksne.packetauth.Utils.eval;
 
 public final class PacketAuth extends Plugin implements Listener {
     private static ConfigManager config;
@@ -129,25 +129,28 @@ public final class PacketAuth extends Plugin implements Listener {
             config.removeString("storage.mysql.password");
         }
 
-        getProxy().getScheduler().schedule(this, () -> {
-            if (player.getServer() != null) {
-                if (outdated.contains(player.getName())) player.disconnect(config.getString("kick.outdated").replace("%version%", "1.6").replace("&", "§"));
-                else {
-                    if (autogenEnabled && !tokens.containsKey(player.getName())) {
-                        String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
-                        tokens.putString(player.getName(), token);
-                        player.sendData("packetauth:token", token.getBytes());
-                    } else if (autogenEnabled && MySQLEnabled && !db.hasPlayer(player.getName())) {
-                        String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
-                        db.saveToken(player.getName(), token);
-                        player.sendData("packetauth:token", token.getBytes());
-                    } else {
-                        if (!verified.contains(player.getName())) player.disconnect(config.getString("kick.message").replace("%name%", player.getName()).replace("&", "§"));
-                        else verified.remove(player.getName());
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+        long delay = (long) Utils.eval(config.getString("kick.delay").replace("%ping%", String.valueOf(player.getPing())));
+        service.scheduleWithFixedDelay(
+                () -> {
+                    if (outdated.contains(player.getName())) player.disconnect(config.getString("kick.outdated").replace("%version%", "1.6").replace("&", "§"));
+                    else {
+                        if (autogenEnabled && !tokens.containsKey(player.getName())) {
+                            String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
+                            tokens.putString(player.getName(), token);
+                            player.sendData("packetauth:token", token.getBytes());
+                        } else if (autogenEnabled && MySQLEnabled && !db.hasPlayer(player.getName())) {
+                            String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
+                            db.saveToken(player.getName(), token);
+                            player.sendData("packetauth:token", token.getBytes());
+                        } else {
+                            if (!verified.contains(player.getName())) player.disconnect(config.getString("kick.message").replace("%name%", player.getName()).replace("&", "§"));
+                            else verified.remove(player.getName());
+                        }
                     }
-                }
-                outdated.remove(player.getName());
-            }
-        }, (long) eval(config.getString("kick.delay").replace("%ping%", String.valueOf(player.getPing()))), TimeUnit.MILLISECONDS);
+                    outdated.remove(player.getName());
+                    service.shutdown();
+                }, delay, delay, TimeUnit.MILLISECONDS
+        );
     }
 }

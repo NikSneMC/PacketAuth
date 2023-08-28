@@ -72,8 +72,7 @@ public class ConfigManager {
         configMap.clear();
         File configFile = new File(configFilePath);
         try {
-            if (!configFile.exists()) {
-                configFile.getParentFile().mkdirs();
+            if (!configFile.exists() && configFile.getParentFile().mkdirs()) {
                 copyDefaultConfig();
             }
             Yaml yaml = new Yaml();

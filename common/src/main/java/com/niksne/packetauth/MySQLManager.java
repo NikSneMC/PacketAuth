@@ -44,25 +44,15 @@ public class MySQLManager {
         }
     }
 
-    public boolean hasPlayer(String playerName) {
+    public boolean noPlayer(String playerName) {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + tableName + " WHERE name = ?");
             statement.setString(1, playerName);
             ResultSet resultSet = statement.executeQuery();
-            return resultSet.next();
+            return !resultSet.next();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false;
-    }
-
-    public void close() {
-        try {
-            if (connection != null) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        return true;
     }
 }

@@ -1,10 +1,8 @@
 package com.niksne.packetauth.bukkit;
 
-import com.niksne.packetauth.ConfigManager;
-import com.niksne.packetauth.MigrateConfig;
-import com.niksne.packetauth.MySQLManager;
-import com.niksne.packetauth.Utils;
+import com.niksne.packetauth.*;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,16 +13,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public final class PacketAuth extends JavaPlugin implements Listener, PluginMessageListener {
     private static ConfigManager config;
     private static ConfigManager tokens;
+    private static ConfigManager disabled;
+
+    private static MySQLManager db;
 
     private final Set<String> verified = new HashSet<>();
-    private final Set<String> outdated = new HashSet<>();
+    private Set<String> outdated = new HashSet<>();
 
     @Override
     public void onEnable() {
@@ -37,8 +36,10 @@ public final class PacketAuth extends JavaPlugin implements Listener, PluginMess
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "packetauth:token");
 
         Utils.checkAutogen(config);
+        db = Utils.checkStorageType(config);
 
-        if (Utils.checkStorageType(config, false) == null) tokens = new ConfigManager(getDataFolder().getPath(), "tokens", "empty");
+        if (db == null) tokens = new ConfigManager(getDataFolder().getPath(), "tokens", "empty");
+        if (Utils.checkTokenDisabling(config, db)) disabled = new ConfigManager(getDataFolder().getPath(),"disabled_tokens", "empty");
     }
 
     @Override
@@ -50,36 +51,24 @@ public final class PacketAuth extends JavaPlugin implements Listener, PluginMess
     @EventHandler
     public void onPlayerLogin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
-        outdated.add(player.getName());
-
-        MySQLManager db = Utils.checkStorageType(config, true);
-        boolean autogenEnabled = Utils.checkAutogen(config);
-
-        PacketAuth plugin = this;
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
-        long delay = (long) Utils.eval(config.getString("kick.delay").replace("%ping%", String.valueOf(player.getPing())));
-        service.scheduleWithFixedDelay(
-                () -> {
-                    if (player.isOnline()) {
-                        if (outdated.contains(player.getName())) player.kickPlayer(config.getString("kick.outdated").replace("%version%", "1.6").replace("&", "§"));
-                        else {
-                            if (autogenEnabled && db == null && !tokens.containsKey(player.getName())) {
-                                String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
-                                tokens.putString(player.getName(), token);
-                                player.sendPluginMessage(plugin, "packetauth:token", token.getBytes());
-                            } else if (autogenEnabled && db != null && db.noPlayer(player.getName())) {
-                                String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
-                                db.saveToken(player.getName(), token);
-                                player.sendPluginMessage(plugin, "packetauth:token", token.getBytes());
-                            } else {
-                                if (!verified.contains(player.getName())) player.kickPlayer(config.getString("kick.message").replace("%name%", player.getName()).replace("&", "§"));
-                                else verified.remove(player.getName());
-                            }
-                        }
-                        outdated.remove(player.getName());
+        LoginPreparer preparer = new LoginPreparer(config, db, outdated, player.getName(), player.getPing());
+        outdated = preparer.getOutdated();
+        db = preparer.getDb();
+        preparer.getService().scheduleWithFixedDelay(
+            () -> {
+                preparer.getService().shutdown();
+                if (player.isOnline()) {
+                    LoginChecker checker = new LoginChecker(preparer, player.getName(), config, db, disabled, tokens, verified);
+                    System.out.println(checker.getAction());
+                    System.out.println(ChatColor.translateAlternateColorCodes('&', checker.getReason()));
+                    switch (checker.getAction()) {
+                        case "kick" -> player.kickPlayer(ChatColor.translateAlternateColorCodes('&', checker.getReason()));
+                        case "send_token" -> player.sendPluginMessage(this, "packetauth:token", checker.getToken().getBytes());
+                        case "pass" -> verified.remove(player.getName());
                     }
-                    service.shutdown();
-                }, delay, delay, TimeUnit.MILLISECONDS
+                }
+                outdated.remove(player.getName());
+            }, preparer.getDelay(), preparer.getDelay(), TimeUnit.MILLISECONDS
         );
     }
 }

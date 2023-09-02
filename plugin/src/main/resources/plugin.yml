@@ -8,3 +8,5 @@ authors: [NikSne]
 description: Authorization system for servers without online mode
 website: https://modrinth.com/mod/packetauth
 folia-supported: true
+database: true
+

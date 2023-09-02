@@ -27,8 +27,8 @@ repositories {
 }
 
 dependencies {
-    shade project(':common')
-    implementation project(":common")
+    shade project(path: ':common')
+    implementation project(path: ":common")
     compileOnly "org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT"
     compileOnly "net.md-5:bungeecord-api:1.18-R0.1-SNAPSHOT"
     compileOnly "com.velocitypowered:velocity-api:3.2.0-SNAPSHOT"
@@ -54,7 +54,7 @@ tasks.withType(JavaCompile).configureEach {
 processResources {
     inputs.property "version", version
     filteringCharset "UTF-8"
-    filesMatching(["plugin.yml", "bungee.yml", "velocity-plugin.json"]) {
+    filesMatching(["plugin.yml", "bungee.yml", "META-INF/sponge_plugins.json", "velocity-plugin.json"]) {
         expand "version": version
     }
 }

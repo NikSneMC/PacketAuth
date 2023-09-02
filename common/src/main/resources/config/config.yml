@@ -1,11 +1,13 @@
-config.version: "1.6"
+config.version: "1.6.2"
 
 kick.outdated: "&cYou need &aPacket Auth %version% or never &cto play on this server!"
 kick.message: "&cAuthorization error!"
 kick.delay: "%ping% + 200"
 
+storage.mode: "file"
+
+tokenDisabling.enabled: "false"
+
 tokengen.enabled: "true"
 tokengen.length: "4096"
 tokengen.symbols: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-
-storage.mode: "file"

@@ -45,8 +45,10 @@
   "custom": {
     "modmenu": {
       "links": {
-        "modrinth": "https://modrinth.com/mod/packetauth",
-        "discord": "https://discord.com/invite/hGxQgrYTD3"
+        "Modrinth": "https://modrinth.com/mod/packetauth",
+        "Discord": "https://discord.com/invite/hGxQgrYTD3",
+        "Boosty": "https://boosty.to/niksne",
+        "Support me": "https://www.donationalerts.com/r/niksne"
       },
       "update_checker": true
     }

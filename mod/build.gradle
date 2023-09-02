@@ -11,9 +11,10 @@ configurations {
 }
 
 dependencies {
-    shade project(':common')
+    shade project(path: ':common')
+    implementation project(path: ":common")
     shade 'org.yaml:snakeyaml:2.0'
-    implementation project(":common")
+    compileOnly 'org.yaml:snakeyaml:2.0'
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -43,13 +44,7 @@ tasks.withType(JavaCompile).configureEach {
     }
 }
 
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-    archivesBaseName = project.archives_base_name
-}
+
 
 jar {
     configurations.shade.each { dep ->

@@ -46,9 +46,12 @@ public class MigrateConfig {
                     );
                 }
                 configDatFile.delete();
+            } else if (config.getString("config.version").compareTo("1.6.2") < 0) {
+                config.putString("config.version", "1.6.2");
+                config.addString("tokenDisabling.enabled", "false");
             }
         } catch (Exception e) {
-            //
+            e.printStackTrace();
         }
 
     }

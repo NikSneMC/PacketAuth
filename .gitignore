@@ -1,6 +1,6 @@
 .gradle/
 .idea/
-.temp
+!templates
 build/
 run/
 *.log

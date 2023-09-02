@@ -23,16 +23,21 @@ public class ConfigManager {
         loadConfig();
     }
 
+
+    public boolean getBool(String key) {
+        return Boolean.parseBoolean(configMap.getOrDefault(key, ""));
+    }
     public String getString(String key) {
         loadConfig();
         return configMap.getOrDefault(key, "");
     }
 
-    public void putString(String key, String value) {
+    public String putString(String key, String value) {
         loadConfig();
         if (configMap.containsKey(key)) configMap.replace(key, value);
         else configMap.put(key, value);
         saveConfig();
+        return value;
     }
 
     public void addString(String key, String value) {
@@ -72,7 +77,8 @@ public class ConfigManager {
         configMap.clear();
         File configFile = new File(configFilePath);
         try {
-            if (!configFile.exists() && configFile.getParentFile().mkdirs()) {
+            if (!configFile.exists()) {
+                configFile.getParentFile().mkdirs();
                 copyDefaultConfig();
             }
             Yaml yaml = new Yaml();

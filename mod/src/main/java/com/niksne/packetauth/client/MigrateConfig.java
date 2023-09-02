@@ -28,7 +28,7 @@ public class MigrateConfig {
                 }
             }
         } catch (Exception e) {
-            //
+            e.printStackTrace();
         }
     }
 }

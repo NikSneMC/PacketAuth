@@ -1,8 +1,6 @@
 package com.niksne.packetauth.server;
 
-import com.niksne.packetauth.ConfigManager;
-import com.niksne.packetauth.MySQLManager;
-import com.niksne.packetauth.Utils;
+import com.niksne.packetauth.*;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -18,8 +16,6 @@ import net.minecraft.util.Identifier;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public final class PacketAuth implements DedicatedServerModInitializer, ServerPlayNetworking.PlayChannelHandler {
@@ -29,50 +25,42 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
 
     private static final ConfigManager config = new ConfigManager(FabricLoader.getInstance().getGameDir() + "/config/PacketAuth","config", "config");
     private static ConfigManager tokens;
+    private static ConfigManager disabled;
+
+    private static MySQLManager db;
 
     private final Set<String> verified = new HashSet<>();
-    private final Set<String> outdated = new HashSet<>();
+    private Set<String> outdated = new HashSet<>();
 
     @Override
     public void onInitializeServer() {
         ServerPlayNetworking.registerGlobalReceiver(AUTH_PACKET_ID, this);
 
         new MigrateConfig(config, tokens);
+        Utils.checkAutogen(config);
+        db = Utils.checkStorageType(config);
 
-        if (Utils.checkStorageType(config, false) == null) tokens = new ConfigManager(FabricLoader.getInstance().getGameDir() + "/config/PacketAuth","tokens", "empty");
+        if (db == null) tokens = new ConfigManager(FabricLoader.getInstance().getGameDir() + "/config/PacketAuth","tokens", "empty");
+        if (Utils.checkTokenDisabling(config, db)) disabled = new ConfigManager(FabricLoader.getInstance().getGameDir() + "/config/PacketAuth","disabled_tokens", "empty");
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
-            outdated.add(player.getEntityName());
-
-            MySQLManager db = Utils.checkStorageType(config, true);
-            boolean autogenEnabled = Utils.checkAutogen(config);
-
-            ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
-            long delay = (long) Utils.eval(config.getString("kick.delay").replace("%ping%", String.valueOf(player.pingMilliseconds)));
-
-            service.scheduleWithFixedDelay(
-                    () -> {
-                        if (!player.isDisconnected()) {
-                            if (outdated.contains(player.getEntityName())) player.networkHandler.disconnect(Text.of(config.getString("kick.outdated").replace("%version%", "1.6").replace("&", "§")));
-                            else {
-                                if (autogenEnabled && db == null && !tokens.containsKey(player.getEntityName())) {
-                                    String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
-                                    tokens.putString(player.getEntityName(), token);
-                                    ServerPlayNetworking.send(player, AUTH_TOKEN, new PacketByteBuf(Unpooled.wrappedBuffer(token.getBytes())));
-                                } else if (autogenEnabled && db != null && db.noPlayer(player.getEntityName())) {
-                                    String token = Utils.generateRandomToken(config.getString("tokengen.symbols").replace(";", ""), Integer.parseInt(config.getString("tokengen.length")));
-                                    db.saveToken(player.getEntityName(), token);
-                                    ServerPlayNetworking.send(player, AUTH_TOKEN, new PacketByteBuf(Unpooled.wrappedBuffer(token.getBytes())));
-                                } else {
-                                    if (!verified.contains(player.getEntityName())) player.networkHandler.disconnect(Text.of(config.getString("kick.message").replace("%name%", player.getEntityName()).replace("&", "§")));
-                                    else verified.remove(player.getEntityName());
-                                }
-                            }
-                            outdated.remove(player.getEntityName());
+            LoginPreparer preparer = new LoginPreparer(config, db, outdated, player.getEntityName(), player.pingMilliseconds);
+            outdated = preparer.getOutdated();
+            db = preparer.getDb();
+            preparer.getService().scheduleWithFixedDelay(
+                () -> {
+                    preparer.getService().shutdown();
+                    if (!player.isDisconnected()) {
+                        LoginChecker checker = new LoginChecker(preparer, player.getEntityName(), config, db, disabled, tokens, verified);
+                        switch (checker.getAction()) {
+                            case "kick" -> player.networkHandler.disconnect(Text.of(checker.getReason().replace("&", "§")));
+                            case "send_token" -> ServerPlayNetworking.send(player, AUTH_TOKEN, new PacketByteBuf(Unpooled.wrappedBuffer(checker.getToken().getBytes())));
+                            case "pass" -> verified.remove(player.getEntityName());
                         }
-                        service.shutdown();
-                    }, delay, delay, TimeUnit.MILLISECONDS
+                    }
+                    outdated.remove(player.getEntityName());
+                }, preparer.getDelay(), preparer.getDelay(), TimeUnit.MILLISECONDS
             );
         });
 

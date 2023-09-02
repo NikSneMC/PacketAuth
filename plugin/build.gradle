@@ -54,7 +54,7 @@ tasks.withType(JavaCompile).configureEach {
 processResources {
     inputs.property "version", version
     filteringCharset "UTF-8"
-    filesMatching(["plugin.yml", "bungee.yml", "META-INF/sponge_plugins.json", "velocity-plugin.json"]) {
+    filesMatching(["plugin.yml", "bungee.yml", "velocity-plugin.json"]) {
         expand "version": version
     }
 }

@@ -86,11 +86,12 @@ public class Utils {
             }
         }.parse();
     }
-    public static String generateRandomToken(String sourceString, int length) {
+    public static String generateRandomToken(ConfigManager config) {
+        String sourceString = config.getString("tokengen.symbols").replace(";", "");
         StringBuilder sb = new StringBuilder();
         SecureRandom random = new SecureRandom();
 
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < Integer.parseInt(config.getString("tokengen.length")); i++) {
             int randomIndex = random.nextInt(sourceString.length());
             char randomChar = sourceString.charAt(randomIndex);
             sb.append(randomChar);
@@ -100,7 +101,7 @@ public class Utils {
     }
 
     public static boolean checkAutogen(ConfigManager config) {
-        boolean autogenEnabled = Boolean.parseBoolean(config.getString("tokengen.enabled"));
+        boolean autogenEnabled = config.getBool("tokengen.enabled");
         if (autogenEnabled) {
             config.addString("tokengen.length", "4096");
             config.addString("tokengen.symbols", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
@@ -111,7 +112,24 @@ public class Utils {
         return autogenEnabled;
     }
 
-    public static MySQLManager checkStorageType(ConfigManager config, boolean connect) {
+    public static boolean checkTokenDisabling(ConfigManager config, MySQLManager db) {
+        boolean tokenDisablingEnabled = config.getBool("tokenDisabling.enabled");
+        if (tokenDisablingEnabled) {
+            config.addString("kick.disabled", "&cYour token has been disabled!");
+            config.addString("kick.disabled.reason", "&cReason: %reason%");
+            if (config.getString("storage.mode").equals("mysql") && db != null) {
+                config.addString("tokenDisabling.tableName", "disabledTokens");
+                db.createTable(config.getString("tokenDisabling.tableName"), "reason");
+            }
+        } else {
+            config.removeString("kick.disabled");
+            config.removeString("kick.disabled.reason");
+            config.removeString("tokenDisabling.tableName");
+        }
+        return tokenDisablingEnabled;
+    }
+
+    public static MySQLManager checkStorageType(ConfigManager config) {
         boolean MySQLEnabled = config.getString("storage.mode").equals("mysql");
         MySQLManager db;
         if (MySQLEnabled) {
@@ -121,15 +139,14 @@ public class Utils {
             config.addString("storage.mysql.tableName", "Tokens");
             config.addString("storage.mysql.user", "PacketAuth");
             config.addString("storage.mysql.password", "PacketAuthPluginPassword1234");
-            if (connect) db = new MySQLManager(
+            db = new MySQLManager(
                         config.getString("storage.mysql.host"),
                         Integer.parseInt(config.getString("storage.mysql.port")),
                         config.getString("storage.mysql.databaseName"),
                         config.getString("storage.mysql.tableName"),
                         config.getString("storage.mysql.user"),
                         config.getString("storage.mysql.password")
-                );
-            else db = null;
+            );
         } else {
             db = null;
             config.removeString("storage.mysql.host");
@@ -142,25 +159,25 @@ public class Utils {
         return db;
     }
 
-    public static void verify(
-            byte[] input,
-            Set<String> outdated,
-            String name,
-            ConfigManager config,
-            ConfigManager tokens,
-            Set<String> verified
-    ) {
+    public static void verify( byte[] input, Set<String> outdated, String name, ConfigManager config, ConfigManager tokens, Set<String> verified) {
         String income = new String(input, StandardCharsets.UTF_8);
         if (!income.contains(";")) income = "0;" + income;
-        List<String> msg =  List.of(income.split(";"));
+        List<String> msg = new java.util.ArrayList<>(List.of(income.split(";")));
+        if (msg.size() == 1) msg.add("");
         if (msg.get(0).compareTo("1.6") >= 0) outdated.remove(name);
-        MySQLManager db = Utils.checkStorageType(config, true);
+        MySQLManager db = Utils.checkStorageType(config);
         if (db == null) {
             if (!tokens.containsKey(name)) return;
             if (msg.get(1).equals(tokens.getString(name).replace(";", ""))) verified.add(name);
         } else {
-            if (db.noPlayer(name)) return;
+            if (!db.hasRecord(config.getString("storage.mysql.tableName"), name)) return;
             if (msg.get(1).equals(db.getToken(name).replace(";", ""))) verified.add(name);
         }
+    }
+
+    public static String parseMessage(ConfigManager config, String reason) {
+        String msg = config.getString("kick.disabled");
+        if (!reason.isBlank()) msg += String.format("\n&r&f%s", config.getString("kick.disabled.reason"));
+        return msg.replace("%reason%", String.format("&r&f%s", reason));
     }
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "packetauthmod",
+  "id": "packetauth",
   "version": "${version}",
 
   "name": "Packet Auth",
@@ -11,7 +11,8 @@
   "contact": {
     "email": "niksne.mc@yandex.ru",
     "sources": "https://github.com/NikSneMC/PacketAuth",
-    "issues": "https://github.com/NikSneMC/PacketAuth/issues"
+    "issues": "https://github.com/NikSneMC/PacketAuth/issues",
+    "homepage": "http://niksne.sytes.net"
   },
 
   "license": "All-Rights-Reserved",

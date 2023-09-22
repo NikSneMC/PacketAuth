@@ -45,7 +45,7 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
-            LoginPreparer preparer = new LoginPreparer(config, db, outdated, player.getEntityName(), player.pingMilliseconds);
+            LoginPreparer preparer = new LoginPreparer(config, db, outdated, player.getEntityName(), handler.getLatency());
             outdated = preparer.getOutdated();
             db = preparer.getDb();
             preparer.getService().scheduleWithFixedDelay(
@@ -68,6 +68,6 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
 
     @Override
     public void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        Utils.verify(buf.getWrittenBytes(), outdated, player.getEntityName(), config, tokens, verified);
+        Utils.verify(buf.copy().array(), outdated, player.getEntityName(), config, tokens, verified);
     }
 }

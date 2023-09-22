@@ -159,7 +159,7 @@ public class Utils {
         return db;
     }
 
-    public static void verify( byte[] input, Set<String> outdated, String name, ConfigManager config, ConfigManager tokens, Set<String> verified) {
+    public static void verify(byte[] input, Set<String> outdated, String name, ConfigManager config, ConfigManager tokens, Set<String> verified) {
         String income = new String(input, StandardCharsets.UTF_8);
         if (!income.contains(";")) income = "0;" + income;
         List<String> msg = new java.util.ArrayList<>(List.of(income.split(";")));

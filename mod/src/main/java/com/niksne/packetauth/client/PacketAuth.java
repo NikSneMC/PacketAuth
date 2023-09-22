@@ -34,7 +34,7 @@ public class PacketAuth implements ClientModInitializer, ClientPlayNetworking.Pl
 	@Override
 	public void receive(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
 		String ip = handler.getConnection().getAddress().toString();
-		config.putString(String.format("%s%s", ip.substring(0, ip.indexOf("/")), ip.substring(ip.indexOf(":"))), new String(buf.getWrittenBytes(), StandardCharsets.UTF_8));
+		config.putString(String.format("%s%s", ip.substring(0, ip.indexOf("/")), ip.substring(ip.indexOf(":"))), new String(buf.copy().array(), StandardCharsets.UTF_8));
 	}
 
 	public static ConfigManager getConfig() { return config; }

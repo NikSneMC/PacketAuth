@@ -36,11 +36,6 @@ public abstract class AddServerScreenMixin extends Screen {
         super(null);
     }
 
-    @Inject(at = @At("TAIL"), method = "tick")
-    public void tick(CallbackInfo ci) {
-        this.tokenField.tick();
-    }
-
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/CyclingButtonWidget;builder(Ljava/util/function/Function;)Lnet/minecraft/client/gui/widget/CyclingButtonWidget$Builder;"), method = "init")
     private void init1(CallbackInfo ci) {
         this.tokenField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 146, 200, 20, Text.translatable("addServer.enterToken"));
@@ -80,12 +75,12 @@ public abstract class AddServerScreenMixin extends Screen {
         PacketAuth.getConfig().putString(ip, this.tokenField.getText().replace(";", ""));
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawCenteredTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;III)V"), method = "render")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;render(Lnet/minecraft/client/gui/DrawContext;IIF)V"), method = "render")
     public void render1(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         context.drawTextWithShadow(this.textRenderer, ENTER_TOKEN_TEXT, this.width / 2 - 100, 135, 10526880);
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;render(Lnet/minecraft/client/gui/DrawContext;IIF)V"), method = "render")
+    @Inject(at = @At("TAIL"), method = "render")
     public void render2(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         this.tokenField.render(context, mouseX, mouseY, delta);
     }

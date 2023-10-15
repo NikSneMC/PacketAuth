@@ -50,10 +50,10 @@ public abstract class AddServerScreenMixin extends Screen {
     private void init2(CallbackInfo ci) {
         for (Element element : this.children()) {
             if (element instanceof CyclingButtonWidget<?> button) {
-                button.y += 18 + 24;
+                button.setY(button.getY() + 18 + 24);
             }
             if (element instanceof ButtonWidget button) {
-                button.y += 18 + 24;
+                button.setY(button.getY() + 18 + 24);
             }
         }
     }

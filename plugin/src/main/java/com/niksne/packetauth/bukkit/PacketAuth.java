@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -22,11 +23,19 @@ public final class PacketAuth extends JavaPlugin implements Listener, PluginMess
 
     private static MySQLManager db;
 
+    private static boolean isFolia;
+
     private final Set<String> verified = new HashSet<>();
     private Set<String> outdated = new HashSet<>();
 
     @Override
     public void onEnable() {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            isFolia = true;
+        } catch (ClassNotFoundException e) {
+            isFolia = false;
+        }
         config =  new ConfigManager(getDataFolder().getPath(), "config", "config");
         new MigrateConfig(config, tokens);
 
@@ -54,21 +63,33 @@ public final class PacketAuth extends JavaPlugin implements Listener, PluginMess
         LoginPreparer preparer = new LoginPreparer(config, db, outdated, player.getName(), player.getPing());
         outdated = preparer.getOutdated();
         db = preparer.getDb();
-        preparer.getService().scheduleWithFixedDelay(
-            () -> {
-                preparer.getService().shutdown();
-                if (player.isOnline()) {
-                    LoginChecker checker = new LoginChecker(preparer, player.getName(), config, db, disabled, tokens, verified);
-                    System.out.println(checker.getAction());
-                    System.out.println(ChatColor.translateAlternateColorCodes('&', checker.getReason()));
-                    switch (checker.getAction()) {
-                        case "kick" -> player.kickPlayer(ChatColor.translateAlternateColorCodes('&', checker.getReason()));
-                        case "send_token" -> player.sendPluginMessage(this, "packetauth:token", checker.getToken().getBytes());
-                        case "pass" -> verified.remove(player.getName());
-                    }
-                }
-                outdated.remove(player.getName());
-            }, preparer.getDelay(), preparer.getDelay(), TimeUnit.MILLISECONDS
-        );
+        if (isFolia) {
+            preparer.getService().scheduleWithFixedDelay(
+                    () -> {
+                        preparer.getService().shutdown();
+                        check(player, preparer);
+                    }, preparer.getDelay(), preparer.getDelay(), TimeUnit.MILLISECONDS
+            );
+            return;
+        }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                check(player, preparer);
+            }
+        }.runTaskLater(this, preparer.getDelay() / 20);
+    }
+
+    private void check(Player player, LoginPreparer preparer) {
+        if (player.isOnline()) {
+            LoginChecker checker = new LoginChecker(preparer, player.getName(), config, db, disabled, tokens, verified);
+            switch (checker.getAction()) {
+                case "kick" -> player.kickPlayer(ChatColor.translateAlternateColorCodes('&', checker.getReason()));
+                case "send_token" -> player.sendPluginMessage(this, "packetauth:token", checker.getToken().getBytes());
+                case "pass" -> verified.remove(player.getName());
+            }
+        }
+        outdated.remove(player.getName());
     }
 }

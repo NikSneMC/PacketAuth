@@ -3,7 +3,7 @@ package com.niksne.packetauth.client.mixin;
 import com.niksne.packetauth.client.PacketAuth;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.AddServerScreen;
+import net.minecraft.client.gui.screen.multiplayer.AddServerScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
@@ -58,7 +58,7 @@ public abstract class AddServerScreenMixin extends Screen {
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/AddServerScreen;init(Lnet/minecraft/client/MinecraftClient;II)V"), method = "resize")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/multiplayer/AddServerScreen;init(Lnet/minecraft/client/MinecraftClient;II)V"), method = "resize")
     public void resize1(CallbackInfo ci) {
         string3 = this.tokenField.getText();
     }

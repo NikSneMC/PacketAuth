@@ -45,21 +45,21 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
-            LoginPreparer preparer = new LoginPreparer(config, db, outdated, player.getEntityName(), handler.getLatency());
+            LoginPreparer preparer = new LoginPreparer(config, db, outdated, player.getName().getString(), handler.getLatency());
             outdated = preparer.getOutdated();
             db = preparer.getDb();
             preparer.getService().scheduleWithFixedDelay(
                 () -> {
                     preparer.getService().shutdown();
                     if (!player.isDisconnected()) {
-                        LoginChecker checker = new LoginChecker(preparer, player.getEntityName(), config, db, disabled, tokens, verified);
+                        LoginChecker checker = new LoginChecker(preparer, player.getName().getString(), config, db, disabled, tokens, verified);
                         switch (checker.getAction()) {
                             case "kick" -> player.networkHandler.disconnect(Text.of(checker.getReason().replace("&", "§")));
                             case "send_token" -> ServerPlayNetworking.send(player, AUTH_TOKEN, new PacketByteBuf(Unpooled.wrappedBuffer(checker.getToken().getBytes())));
-                            case "pass" -> verified.remove(player.getEntityName());
+                            case "pass" -> verified.remove(player.getName().getString());
                         }
                     }
-                    outdated.remove(player.getEntityName());
+                    outdated.remove(player.getName().getString());
                 }, preparer.getDelay(), preparer.getDelay(), TimeUnit.MILLISECONDS
             );
         });
@@ -68,6 +68,6 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
 
     @Override
     public void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        Utils.verify(buf.copy().array(), outdated, player.getEntityName(), config, tokens, verified);
+        Utils.verify(buf.copy().array(), outdated, player.getName().getString(), config, tokens, verified);
     }
 }

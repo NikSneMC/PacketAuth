@@ -13,14 +13,14 @@ public class MigrateConfig {
     public MigrateConfig(ConfigManager config) {
         try {
             if (serversDatFile.exists()) {
-                NbtCompound nbt = NbtIo.read(serversDatFile);
+                NbtCompound nbt = NbtIo.read(serversDatFile.toPath());
                 assert nbt != null;
                 for (String key: nbt.getKeys()) {
                     config.addString(
                             key,
                             Objects.requireNonNull(
                                     Objects.requireNonNull(
-                                            NbtIo.read(serversDatFile)
+                                            NbtIo.read(serversDatFile.toPath())
                                     ).get(key)
                             ).asString()
                     );

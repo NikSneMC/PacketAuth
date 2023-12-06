@@ -17,7 +17,7 @@ public class MigrateConfig {
                         "kick.message",
                         Objects.requireNonNull(
                                 Objects.requireNonNull(
-                                        NbtIo.read(configDatFile)
+                                        NbtIo.read(configDatFile.toPath())
                                 ).get("kick-message")
                         ).asString()
                 );
@@ -25,13 +25,13 @@ public class MigrateConfig {
                         "kick.delay",
                         Objects.requireNonNull(
                             Objects.requireNonNull(
-                                    NbtIo.read(configDatFile)
+                                    NbtIo.read(configDatFile.toPath())
                             ).get("kick-delay")
                     ).asString()
                 );
                 for (String key: Objects.requireNonNull(
                         (NbtCompound) Objects.requireNonNull(
-                                NbtIo.read(configDatFile)
+                                NbtIo.read(configDatFile.toPath())
                         ).get("tokens")
                 ).getKeys()) {
                     tokens.addString(
@@ -39,7 +39,7 @@ public class MigrateConfig {
                             Objects.requireNonNull(
                                     Objects.requireNonNull(
                                             (NbtCompound) Objects.requireNonNull(
-                                                    NbtIo.read(configDatFile)
+                                                    NbtIo.read(configDatFile.toPath())
                                             ).get("tokens")
                                     ).get(key)
                             ).asString()

@@ -23,14 +23,12 @@ dependencies {
 
 processResources {
     inputs.property "version", project.version
-    inputs.property "max_minecraft_version", project.max_minecraft_version
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
-                "max_minecraft_version": project.max_minecraft_version,
                 "minecraft_version": project.minecraft_version,
                 "loader_version": project.loader_version
     }
@@ -59,5 +57,5 @@ remapJar {
     archiveBaseName.set("PacketAuth")
     archiveClassifier.set("")
     archiveAppendix.set("FabricQuilt")
-    archiveVersion.set(String.format("%s_%s-%s", version, project.minecraft_version, project.max_minecraft_version))
+    archiveVersion.set(String.format("%s_%s", version, project.minecraft_version))
 }

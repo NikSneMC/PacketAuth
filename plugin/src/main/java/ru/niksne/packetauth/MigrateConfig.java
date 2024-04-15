@@ -1,4 +1,4 @@
-package com.niksne.packetauth;
+package ru.niksne.packetauth;
 
 import java.util.HashMap;
 import java.util.Map;

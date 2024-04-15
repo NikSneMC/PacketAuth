@@ -1,6 +1,6 @@
-package com.niksne.packetauth.server;
+package ru.niksne.packetauth.server;
 
-import com.niksne.packetauth.ConfigManager;
+import ru.niksne.packetauth.ConfigManager;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;

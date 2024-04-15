@@ -1,4 +1,4 @@
-package com.niksne.packetauth;
+package ru.niksne.packetauth;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;

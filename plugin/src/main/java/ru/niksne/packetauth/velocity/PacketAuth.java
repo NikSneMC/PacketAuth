@@ -1,7 +1,7 @@
-package com.niksne.packetauth.velocity;
+package ru.niksne.packetauth.velocity;
 
+import ru.niksne.packetauth.*;
 import com.google.inject.Inject;
-import com.niksne.packetauth.*;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;

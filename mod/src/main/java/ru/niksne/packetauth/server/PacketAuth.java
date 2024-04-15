@@ -1,6 +1,6 @@
-package com.niksne.packetauth.server;
+package ru.niksne.packetauth.server;
 
-import com.niksne.packetauth.*;
+import ru.niksne.packetauth.*;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;

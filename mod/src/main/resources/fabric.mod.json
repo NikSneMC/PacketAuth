@@ -9,10 +9,10 @@
     "NikSne"
   ],
   "contact": {
-    "email": "niksne.mc@yandex.ru",
+    "email": "contact@niksne.ru",
     "sources": "https://github.com/NikSneMC/PacketAuth",
     "issues": "https://github.com/NikSneMC/PacketAuth/issues",
-    "homepage": "http://niksne.sytes.net"
+    "homepage": "https://niksne.ru"
   },
 
   "license": "All-Rights-Reserved",
@@ -21,11 +21,11 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.niksne.packetauth.client.PacketAuth"
+      "ru.niksne.packetauth.client.PacketAuth"
 
     ],
     "server": [
-      "com.niksne.packetauth.server.PacketAuth"
+      "ru.niksne.packetauth.server.PacketAuth"
     ]
   },
   "mixins": [

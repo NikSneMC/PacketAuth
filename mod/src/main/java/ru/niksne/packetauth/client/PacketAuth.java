@@ -1,6 +1,6 @@
-package com.niksne.packetauth.client;
+package ru.niksne.packetauth.client;
 
-import com.niksne.packetauth.ConfigManager;
+import ru.niksne.packetauth.ConfigManager;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;

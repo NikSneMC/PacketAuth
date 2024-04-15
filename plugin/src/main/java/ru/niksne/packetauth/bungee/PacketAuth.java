@@ -1,6 +1,6 @@
-package com.niksne.packetauth.bungee;
+package ru.niksne.packetauth.bungee;
 
-import com.niksne.packetauth.*;
+import ru.niksne.packetauth.*;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;

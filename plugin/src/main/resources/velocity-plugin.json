@@ -3,10 +3,10 @@
   "name": "Packet Auth",
   "version": "${version}",
   "description": "Authorization system for servers without online mode",
-  "url": "https://modrinth.com/mod/packetauth",
+  "url": "https://niksne.ru",
   "authors": [
     "NikSne"
   ],
   "dependencies": [],
-  "main": "com.niksne.packetauth.velocity.PacketAuth"
+  "main": "ru.niksne.packetauth.velocity.PacketAuth"
 }

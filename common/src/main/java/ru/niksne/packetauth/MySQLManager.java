@@ -1,4 +1,4 @@
-package com.niksne.packetauth;
+package ru.niksne.packetauth;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 

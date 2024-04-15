@@ -1,6 +1,6 @@
-package com.niksne.packetauth.server;
+package ru.niksne.packetauth.server;
 
-import com.niksne.packetauth.*;
+import ru.niksne.packetauth.*;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -45,7 +45,7 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
-            LoginPreparer preparer = new LoginPreparer(config, db, outdated, player.getEntityName(), handler.getLatency());
+            LoginPreparer preparer = new LoginPreparer(config, db, outdated, player.getEntityName(), handler.player.pingMilliseconds);
             outdated = preparer.getOutdated();
             db = preparer.getDb();
             preparer.getService().scheduleWithFixedDelay(

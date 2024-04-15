@@ -1,6 +1,6 @@
-package com.niksne.packetauth.client.mixin;
+package ru.niksne.packetauth.client.mixin;
 
-import com.niksne.packetauth.client.PacketAuth;
+import ru.niksne.packetauth.client.PacketAuth;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.AddServerScreen;

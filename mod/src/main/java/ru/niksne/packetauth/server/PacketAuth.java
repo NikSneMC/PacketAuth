@@ -1,27 +1,21 @@
 package ru.niksne.packetauth.server;
 
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import ru.niksne.packetauth.*;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import ru.niksne.packetauth.payload.AuthPayload;
+import ru.niksne.packetauth.payload.TokenPayload;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public final class PacketAuth implements DedicatedServerModInitializer, ServerPlayNetworking.PlayChannelHandler {
-
-    private static final Identifier AUTH_PACKET_ID = new Identifier("packetauth:auth");
-    private static final Identifier AUTH_TOKEN = new Identifier("packetauth:token");
+public final class PacketAuth implements DedicatedServerModInitializer, ServerPlayNetworking.PlayPayloadHandler<AuthPayload> {
 
     private static final ConfigManager config = new ConfigManager(FabricLoader.getInstance().getGameDir() + "/config/PacketAuth","config", "config");
     private static ConfigManager tokens;
@@ -34,7 +28,9 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
 
     @Override
     public void onInitializeServer() {
-        ServerPlayNetworking.registerGlobalReceiver(AUTH_PACKET_ID, this);
+        PayloadTypeRegistry.playC2S().register(AuthPayload.ID, AuthPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(TokenPayload.ID, TokenPayload.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(AuthPayload.ID, this);
 
         new MigrateConfig(config, tokens);
         Utils.checkAutogen(config);
@@ -55,7 +51,7 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
                         LoginChecker checker = new LoginChecker(preparer, player.getName().getString(), config, db, disabled, tokens, verified);
                         switch (checker.getAction()) {
                             case "kick" -> player.networkHandler.disconnect(Text.of(checker.getReason().replace("&", "§")));
-                            case "send_token" -> ServerPlayNetworking.send(player, AUTH_TOKEN, new PacketByteBuf(Unpooled.wrappedBuffer(checker.getToken().getBytes())));
+                            case "send_token" -> ServerPlayNetworking.send(player, new TokenPayload(checker.getToken()));
                             case "pass" -> verified.remove(player.getName().getString());
                         }
                     }
@@ -67,7 +63,7 @@ public final class PacketAuth implements DedicatedServerModInitializer, ServerPl
     }
 
     @Override
-    public void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        Utils.verify(buf.copy().array(), outdated, player.getName().getString(), config, tokens, verified);
+    public void receive(AuthPayload payload, ServerPlayNetworking.Context context) {
+        Utils.verify(payload.token().getBytes(), outdated, context.player().getName().getString(), config, tokens, verified);
     }
 }

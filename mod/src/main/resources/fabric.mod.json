@@ -21,11 +21,11 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "ru.niksne.packetauth.client.PacketAuth"
+      "ru.niksne.packetauth.fabric.client.PacketAuth"
 
     ],
     "server": [
-      "ru.niksne.packetauth.server.PacketAuth"
+      "ru.niksne.packetauth.fabric.server.PacketAuth"
     ]
   },
   "mixins": [

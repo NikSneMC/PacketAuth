@@ -1,12 +1,26 @@
 package ru.niksne.packetauth;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import ru.niksne.packetauth.storage.ManagerWrapper;
+import ru.niksne.packetauth.storage.database.DatabaseManager;
+import ru.niksne.packetauth.storage.file.ConfigStorage;
+import ru.niksne.packetauth.storage.file.TokenStorage;
+import ru.niksne.packetauth.storage.file.sections.KickSettings;
+import ru.niksne.packetauth.storage.file.sections.StorageSettings;
+import ru.niksne.packetauth.storage.StorageType;
+import ru.niksne.packetauth.storage.file.sections.TokenGenSettings;
+
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class Utils {
-    public static double eval(final String str) {
+    public static double eval(
+            @NotNull final String str
+    ) {
         return new Object() {
             int pos = -1, ch;
 
@@ -15,7 +29,10 @@ public class Utils {
             }
 
             boolean eat(int charToEat) {
-                while (ch == ' ') nextChar();
+                while (ch == ' ') {
+                    nextChar();
+                }
+
                 if (ch == charToEat) {
                     nextChar();
                     return true;
@@ -26,72 +43,82 @@ public class Utils {
             double parse() {
                 nextChar();
                 double x = parseExpression();
-                if (pos < str.length()) throw new RuntimeException("Unexpected: " + (char)ch);
+
+                if (pos < str.length()) {
+                    throw new RuntimeException("Unexpected: " + (char) ch);
+                }
+
                 return x;
             }
 
             double parseExpression() {
                 double x = parseTerm();
-                for (;;) {
-                    if      (eat('+')) x += parseTerm(); // addition
-                    else if (eat('-')) x -= parseTerm(); // subtraction
-                    else return x;
+                for (; ; ) {
+                    if (eat('+')) {
+                        x += parseTerm(); // addition
+                    } else if (eat('-')) {
+                        x -= parseTerm(); // subtraction
+                    } else return x;
                 }
             }
 
             double parseTerm() {
                 double x = parseFactor();
-                for (;;) {
-                    if      (eat('*')) x *= parseFactor(); // multiplication
-                    else if (eat('/')) x /= parseFactor(); // division
-                    else return x;
+                for (; ; ) {
+                    if (eat('*')) {
+                        x *= parseFactor(); // multiplication
+                    } else if (eat('/')) {
+                        x /= parseFactor(); // division
+                    } else {
+                        return x;
+                    }
                 }
             }
 
             double parseFactor() {
-                if (eat('+')) return +parseFactor(); // unary plus
-                if (eat('-')) return -parseFactor(); // unary minus
+                if (eat('+')) {
+                    return +parseFactor(); // unary plus
+                }
+
+                if (eat('-')) {
+                    return -parseFactor(); // unary minus
+                }
 
                 double x;
                 int startPos = this.pos;
                 if (eat('(')) { // parentheses
                     x = parseExpression();
-                    if (!eat(')')) throw new RuntimeException("Missing ')'");
-                } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
-                    while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
-                    x = Double.parseDouble(str.substring(startPos, this.pos));
-                } else if (ch >= 'a' && ch <= 'z') { // functions
-                    while (ch >= 'a' && ch <= 'z') nextChar();
-                    String func = str.substring(startPos, this.pos);
-                    if (eat('(')) {
-                        x = parseExpression();
-                        if (!eat(')')) throw new RuntimeException("Missing ')' after argument to " + func);
-                    } else {
-                        x = parseFactor();
-                    }
-                    x = switch (func) {
-                        case "sqrt" -> Math.sqrt(x);
-                        case "sin" -> Math.sin(Math.toRadians(x));
-                        case "cos" -> Math.cos(Math.toRadians(x));
-                        case "tan" -> Math.tan(Math.toRadians(x));
-                        default -> throw new RuntimeException("Unknown function: " + func);
-                    };
-                } else {
-                    throw new RuntimeException("Unexpected: " + (char)ch);
-                }
 
-                if (eat('^')) x = Math.pow(x, parseFactor()); // exponentiation
+                    if (!eat(')')) {
+                        throw new RuntimeException("Missing ')'");
+                    }
+                } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
+                    while ((ch >= '0' && ch <= '9') || ch == '.') {
+                        nextChar();
+                    }
+
+                    x = Double.parseDouble(str.substring(startPos, this.pos));
+                } else {
+                    throw new RuntimeException("Unexpected: " + (char) ch);
+                }
 
                 return x;
             }
         }.parse();
     }
-    public static String generateRandomToken(ConfigManager config) {
-        String sourceString = config.getString("tokengen.symbols").replace(";", "");
+
+    @NotNull
+    public static String generateRandomToken(
+            @NotNull
+            TokenGenSettings tokengen
+    ) {
+        assert tokengen.symbols != null && tokengen.length != null;
+
+        String sourceString = tokengen.symbols.replace(";", "");
         StringBuilder sb = new StringBuilder();
         SecureRandom random = new SecureRandom();
 
-        for (int i = 0; i < Integer.parseInt(config.getString("tokengen.length")); i++) {
+        for (int i = 0; i < tokengen.length; i++) {
             int randomIndex = random.nextInt(sourceString.length());
             char randomChar = sourceString.charAt(randomIndex);
             sb.append(randomChar);
@@ -100,84 +127,111 @@ public class Utils {
         return sb.toString();
     }
 
-    public static boolean checkAutogen(ConfigManager config) {
-        boolean autogenEnabled = config.getBool("tokengen.enabled");
-        if (autogenEnabled) {
-            config.addString("tokengen.length", "4096");
-            config.addString("tokengen.symbols", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-        } else {
-            config.removeString("tokengen.length");
-            config.removeString("tokengen.symbols");
-        }
-        return autogenEnabled;
-    }
+    @NotNull
+    public static Boolean checkTokenDisabling(
+            @NotNull
+            ConfigStorage configStorage,
+            @Nullable
+            DatabaseManager databaseManager
+    ) {
+        boolean tokenDisablingEnabled = configStorage.token_disabling.enabled;
 
-    public static boolean checkTokenDisabling(ConfigManager config, MySQLManager db) {
-        boolean tokenDisablingEnabled = config.getBool("tokenDisabling.enabled");
-        if (tokenDisablingEnabled) {
-            config.addString("kick.disabled", "&cYour token has been disabled!");
-            config.addString("kick.disabled.reason", "&cReason: %reason%");
-            if (config.getString("storage.mode").equals("mysql") && db != null) {
-                config.addString("tokenDisabling.tableName", "disabledTokens");
-                db.createTable(config.getString("tokenDisabling.tableName"), "reason");
-            }
-        } else {
-            config.removeString("kick.disabled");
-            config.removeString("kick.disabled.reason");
-            config.removeString("tokenDisabling.tableName");
+        if (tokenDisablingEnabled && configStorage.storage.mode.equals(StorageType.MySQL) && databaseManager != null) {
+            assert configStorage.token_disabling.table_name != null;
+            databaseManager.createTable(configStorage.token_disabling.table_name, "reason");
         }
+
         return tokenDisablingEnabled;
     }
 
-    public static MySQLManager checkStorageType(ConfigManager config) {
-        boolean MySQLEnabled = config.getString("storage.mode").equals("mysql");
-        MySQLManager db;
-        if (MySQLEnabled) {
-            config.addString("storage.mysql.host", "localhost");
-            config.addString("storage.mysql.port", "3306");
-            config.addString("storage.mysql.databaseName", "PacketAuth");
-            config.addString("storage.mysql.tableName", "Tokens");
-            config.addString("storage.mysql.user", "PacketAuth");
-            config.addString("storage.mysql.password", "PacketAuthPluginPassword1234");
-            db = new MySQLManager(
-                        config.getString("storage.mysql.host"),
-                        Integer.parseInt(config.getString("storage.mysql.port")),
-                        config.getString("storage.mysql.databaseName"),
-                        config.getString("storage.mysql.tableName"),
-                        config.getString("storage.mysql.user"),
-                        config.getString("storage.mysql.password")
-            );
-        } else {
-            db = null;
-            config.removeString("storage.mysql.host");
-            config.removeString("storage.mysql.port");
-            config.removeString("storage.mysql.databaseName");
-            config.removeString("storage.mysql.tableName");
-            config.removeString("storage.mysql.user");
-            config.removeString("storage.mysql.password");
+    @Nullable
+    public static DatabaseManager checkStorageType(StorageSettings storage) {
+        if (storage.mode == StorageType.File) {
+            return null;
         }
-        return db;
+
+        assert storage.host != null
+                && storage.port != null
+                && storage.database_name != null
+                && storage.table_name != null
+                && storage.user != null
+                && storage.password != null;
+
+        return new DatabaseManager(
+                storage.mode,
+                storage.host,
+                storage.port,
+                storage.database_name,
+                storage.table_name,
+                storage.user,
+                storage.password
+        );
     }
 
-    public static void verify(byte[] input, Set<String> outdated, String name, ConfigManager config, ConfigManager tokens, Set<String> verified) {
+    public static void verify(
+            byte[] input,
+            @NotNull
+            Set<String> outdated,
+            @NotNull
+            String name,
+            @NotNull
+            Set<String> verified
+    ) {
+        @NotNull
+        StorageSettings storage = ManagerWrapper.getConfigStorage().storage;
+        @Nullable
+        TokenStorage tokenStorage = ManagerWrapper.getTokenStorage();
+
         String income = new String(input, StandardCharsets.UTF_8);
-        if (!income.contains(";")) income = "0;" + income;
+        if (!income.contains(";")) {
+            income = "0;" + income;
+        }
+
         List<String> msg = new java.util.ArrayList<>(List.of(income.split(";")));
-        if (msg.size() == 1) msg.add("");
-        if (msg.get(0).compareTo("1.6") >= 0) outdated.remove(name);
-        MySQLManager db = Utils.checkStorageType(config);
-        if (db == null) {
-            if (!tokens.containsKey(name)) return;
-            if (msg.get(1).equals(tokens.getString(name).replace(";", ""))) verified.add(name);
-        } else {
-            if (!db.hasRecord(config.getString("storage.mysql.tableName"), name)) return;
-            if (msg.get(1).equals(db.getToken(name).replace(";", ""))) verified.add(name);
+        if (msg.size() == 1) {
+            msg.add("");
+        }
+        if (msg.get(0).compareTo("1.6") >= 0) {
+            outdated.remove(name);
+        }
+
+        DatabaseManager db = Utils.checkStorageType(storage);
+        if (tokenStorage != null) {
+            if (!tokenStorage.hasTokenFor(name)) {
+                return;
+            }
+
+            if (msg.get(1).equals(tokenStorage.getTokenFor(name).replace(";", ""))) {
+                verified.add(name);
+            }
+        } else if (db != null) {
+            assert storage.table_name != null;
+            if (!db.hasRecord(storage.table_name, "name", name)) {
+                return;
+            }
+
+            if (msg.get(1).equals(Objects.requireNonNull(db.getToken(name)).replace(";", ""))) {
+                verified.add(name);
+            }
         }
     }
 
-    public static String parseMessage(ConfigManager config, String reason) {
-        String msg = config.getString("kick.disabled");
-        if (!reason.isBlank()) msg += String.format("\n&r&f%s", config.getString("kick.disabled.reason"));
-        return msg.replace("%reason%", String.format("&r&f%s", reason));
+    @NotNull
+    public static String parseMessage(
+            @NotNull
+            KickSettings kick,
+            @NotNull
+            String name,
+            @NotNull
+            String reason
+    ) {
+        String msg = kick.disabled;
+        assert msg != null;
+        if (!reason.isBlank()) {
+            msg += String.format("\n&r&f%s", kick.disabled_reason);
+        }
+        return msg
+                .replace("%name%", name)
+                .replace("%reason%", String.format("&r&f%s", reason));
     }
 }

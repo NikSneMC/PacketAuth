@@ -1,0 +1,63 @@
+[config]
+# DON'T TOUCH IT!
+version = "1.6.2"
+
+[kick]
+# Message that's displayed when player don't have compatible mod version.
+# Available placeholders: %name%, %version%
+outdated = "&cYou need &aPacket Auth %version% or never &cto play on this server!"
+
+# Message that"s displayed when player"s token is incorrect
+# Available placeholders: %name%
+message = "&cAuthorization error!"
+
+# Delay between login and version & token check.
+# If You're having previous messages but your token is valid just increase it
+# You can use basic arythmetics (addition, subtraction, multiplication and division). E.g. 2 * (%ping + 100)
+# Available placeholders: %ping%
+delay = "%ping% + 200"
+
+# # These options should be commented only if tokenDisabling.enabled is "false"
+# # Message that's displayed when player's token is disabled.
+# # It'll be displayed in 1st row (by default)
+# # Availble placeholders: %name%
+# disabled = "&cYour token has been disabled!"
+# # Message that's displayed when player's token is disabled and reason is given.
+# # It'll be displayed in 2nd row (by default).
+# # Available placeholders: %name%, %reason%
+# disabled.reason = "&cReason:  %reason%"
+
+[storage]
+# Possible types: "file" (default), "mysql", "mariadb", "postgresql".
+# If you selected "mysql" then you can delete files token.yml and disabled_tokens.yml
+mode = "file"
+
+# # These options should be commented only if mode is "file"
+# # Database address
+# host = "localhost"
+# # Database port
+# port = "3306"
+# # Database name for PacketAuth
+# databaseName = "PacketAuth"
+# # Tokens table name
+# tableName = "Tokens"
+# # Database user login.
+# # I recommend you creation of user with permissions for just PacketAuth table
+# user = "PacketAuth"
+# # Database user password.
+# password = "PacketAuthPluginPassword1234"
+
+[token_disabling]
+# This is disabled by default. Allows you to disable any player's token
+enabled = false
+# # This option should be commented only if storage.mode is "file"
+# # DisabledTokens table name
+# tableName = "disabledTokens"
+
+[tokengen]
+# If enabled, generates random token for player that don't have it
+enabled = true
+# Generated token length
+length = 4096
+# Symbols that the token consists of
+symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"

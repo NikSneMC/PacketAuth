@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "ru.niksne.packetauth.client.mixin",
+  "package": "ru.niksne.packetauth.fabric.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
     "AddServerScreenMixin"

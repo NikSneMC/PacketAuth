@@ -15,4 +15,4 @@ pluginManagement {
     }
 }
 
-include("common", "plugin", "mod")
+include("common:server", "plugin", "mod")

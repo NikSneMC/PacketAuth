@@ -25,9 +25,9 @@ repositories {
 }
 
 dependencies {
-    "shade"(project(":common"))
+    "shade"(project(":common:server"))
     compileOnly("org.spigotmc:spigot-api:1.20.5-R0.1-SNAPSHOT")
-    compileOnly("net.md-5:bungeecord-api:1.20-R0.2-SNAPSHOT")
+    compileOnly("net.md-5:bungeecord-api:1.21-R0.3")
     compileOnly("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
 }

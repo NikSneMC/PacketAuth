@@ -25,10 +25,10 @@ public class Handler implements ClientPlayNetworking.PlayPayloadHandler<TokenPay
 
     @Override
     public void receive(
-            @NotNull
-            TokenPayload payload,
-            @NotNull
-            ClientPlayNetworking.Context context
+        @NotNull
+        TokenPayload payload,
+        @NotNull
+        ClientPlayNetworking.Context context
     ) {
         @NotNull
         String ip;
@@ -44,12 +44,12 @@ public class Handler implements ClientPlayNetworking.PlayPayloadHandler<TokenPay
 
     @Override
     public void onPlayReady(
-            @NotNull
-            ClientPlayNetworkHandler handler,
-            @NotNull
-            PacketSender sender,
-            @NotNull
-            MinecraftClient client
+        @NotNull
+        ClientPlayNetworkHandler handler,
+        @NotNull
+        PacketSender sender,
+        @NotNull
+        MinecraftClient client
     ) {
         String ip = handler.getConnection().getAddress().toString();
         ip = String.format("%s%s", ip.substring(0, ip.indexOf("/")), ip.substring(ip.indexOf(":")));

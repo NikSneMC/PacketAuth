@@ -9,9 +9,9 @@ import ru.niksne.packetauth.storage.file.TokenStorage;
 public class PacketAuth implements ClientModInitializer {
 
     private static final StorageManager<TokenStorage> tokenStorageManager = new StorageManager<>(
-            TokenStorage.class,
-            FabricLoader.getInstance().getConfigDir().resolve("PacketAuth"),
-            "tokens"
+        TokenStorage.class,
+        FabricLoader.getInstance().getConfigDir().resolve("PacketAuth"),
+        "tokens"
     );
 
     @Override

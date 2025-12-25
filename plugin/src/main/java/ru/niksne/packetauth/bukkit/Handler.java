@@ -10,13 +10,13 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import ru.niksne.packetauth.Channel;
-import ru.niksne.packetauth.Utils;
 import ru.niksne.packetauth.login.LoginCheckerAction;
 import ru.niksne.packetauth.login.LoginFlow;
 import ru.niksne.packetauth.login.LoginPreparation;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Handler implements Listener, PluginMessageListener {
@@ -29,8 +29,8 @@ public class Handler implements Listener, PluginMessageListener {
     private final Set<@NotNull String> outdated = new HashSet<>();
 
     Handler(
-            @NotNull
-            PacketAuth packetAuth
+        @NotNull
+        PacketAuth packetAuth
     ) {
         this.packetAuth = packetAuth;
 
@@ -42,43 +42,45 @@ public class Handler implements Listener, PluginMessageListener {
 
     @Override
     public void onPluginMessageReceived(
-            @NotNull
-            String channel,
-            @NotNull
-            Player player,
-            byte[] message
+        @NotNull
+        String channel,
+        @NotNull
+        Player player,
+        byte[] message
     ) {
         if (!channel.equals(Channel.c2s)) {
             return;
         }
 
-        Utils.verify(
-                message,
-                outdated,
-                player.getName(),
-                verified
+        LoginFlow.verify(
+            message,
+            outdated,
+            player.getName(),
+            verified
         );
     }
 
     @EventHandler
     public void onPlayerLogin(
-            @NotNull
-            PlayerLoginEvent event
+        @NotNull
+        PlayerLoginEvent event
     ) {
         Player player = event.getPlayer();
         LoginPreparation preparation = LoginFlow.prepare(
-                outdated,
-                player.getName(),
-                (long) player.getPing()
+            outdated,
+            player.getName(),
+            player.getPing()
         );
 
         if (PacketAuth.isFolia()) {
-            preparation.service().scheduleWithFixedDelay(
+            try (ScheduledExecutorService service = preparation.service()) {
+                service.schedule(
                     () -> {
-                        preparation.service().shutdown();
+                        service.shutdown();
                         check(player);
-                    }, preparation.delay(), preparation.delay(), TimeUnit.MILLISECONDS
-            );
+                    }, preparation.delay(), TimeUnit.MILLISECONDS
+                );
+            }
             return;
         }
 
@@ -87,18 +89,18 @@ public class Handler implements Listener, PluginMessageListener {
             public void run() {
                 check(player);
             }
-        }.runTaskLater(packetAuth, preparation.delay() / 20);
+        }.runTaskLaterAsynchronously(packetAuth, preparation.delay() / 20);
     }
 
     private void check(
-            @NotNull
-            Player player
+        @NotNull
+        Player player
     ) {
         if (player.isOnline()) {
             LoginCheckerAction action = LoginFlow.check(
-                    outdated,
-                    player.getName(),
-                    verified
+                outdated,
+                player.getName(),
+                verified
             );
 
             switch (action) {

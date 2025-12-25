@@ -4,8 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TokenDisablingSettings {
-    @NotNull
-    public Boolean enabled = true;
+    public boolean enabled = true;
     @Nullable
     public String table_name = "disabledTokens";
 }

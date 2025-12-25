@@ -20,7 +20,7 @@ configurations {
 }
 
 dependencies {
-    "shade"(project(":common"))
+    "shade"(project(":common:server"))
     compileOnly("org.yaml:snakeyaml:2.0")
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
     mappings("net.fabricmc:yarn:${property("yarn_mappings")}:v2")

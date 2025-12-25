@@ -10,29 +10,32 @@ public class TokenStorage {
     static final String base = "tokens";
 
     @NotNull
-    private Map<@NotNull String, @NotNull String> tokens = new HashMap<>();
+    private final Map<String, String> tokens = new HashMap<>();
+    @NotNull
+    private final Map<@NotNull String, @NotNull String> disabled = new HashMap<>();
+
 
     @NotNull
     public Boolean hasTokenFor(
-            @NotNull
-            String name
+        @NotNull
+        String name
     ) {
         return tokens.containsKey(name);
     }
 
     @NotNull
     public String getTokenFor(
-            @NotNull
-            String name
+        @NotNull
+        String name
     ) {
         return tokens.getOrDefault(name, "");
     }
 
     public void saveTokenFor(
-            @NotNull
-            String name,
-            @NotNull
-            String token
+        @NotNull
+        String name,
+        @NotNull
+        String token
     ) {
         tokens.put(name, token);
     }

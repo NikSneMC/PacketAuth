@@ -5,7 +5,7 @@ import ru.niksne.packetauth.storage.file.TokenStorage;
 
 public class MigrateConfig {
     public MigrateConfig(
-            StorageManager<TokenStorage> tokenStorageManager
+        StorageManager<TokenStorage> tokenStorageManager
     ) {
         // TODO: add config migrations
     }

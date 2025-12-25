@@ -21,19 +21,19 @@ public class StorageManager<T> {
     private T storage;
 
     public StorageManager(
-            @NotNull
-            Class<T> type,
-            @NotNull
-            Path configDir,
-            @NotNull
-            String fileName
+        @NotNull
+        Class<T> type,
+        @NotNull
+        Path configDir,
+        @NotNull
+        String fileName
     ) {
         this.type = type;
         String base;
         try {
             base = type.getDeclaredField("base").get(null).toString();
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        } catch (NoSuchFieldException | IllegalAccessException exc) {
+            throw new RuntimeException(exc);
         }
         this.filePath = configDir.resolve(fileName + ".toml");
         this.defaultFilePath = "config/" + base + ".toml";
@@ -54,8 +54,8 @@ public class StorageManager<T> {
         
         try {
             writer.write(storage, filePath.toFile());
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exc) {
+            exc.printStackTrace();
         }
     }
 

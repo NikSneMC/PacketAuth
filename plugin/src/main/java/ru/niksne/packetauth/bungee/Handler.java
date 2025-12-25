@@ -9,13 +9,13 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import org.jetbrains.annotations.NotNull;
 import ru.niksne.packetauth.Channel;
-import ru.niksne.packetauth.Utils;
 import ru.niksne.packetauth.login.LoginCheckerAction;
 import ru.niksne.packetauth.login.LoginFlow;
 import ru.niksne.packetauth.login.LoginPreparation;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Handler implements Listener {
@@ -25,8 +25,8 @@ public class Handler implements Listener {
     private Set<@NotNull String> outdated = new HashSet<>();
 
     public Handler(
-            @NotNull
-            PacketAuth packetAuth
+        @NotNull
+        PacketAuth packetAuth
     ) {
 
         packetAuth.getProxy().getPluginManager().registerListener(packetAuth, this);
@@ -37,8 +37,8 @@ public class Handler implements Listener {
 
     @EventHandler
     public void onPluginMessageReceived(
-            @NotNull
-            PluginMessageEvent event
+        @NotNull
+        PluginMessageEvent event
     ) {
         if (!event.getTag().equals(Channel.c2s)) {
             return;
@@ -46,45 +46,48 @@ public class Handler implements Listener {
 
         ProxiedPlayer player = (ProxiedPlayer) event.getSender();
 
-        Utils.verify(
-                event.getData(),
-                outdated,
-                player.getName(),
-                verified
+        LoginFlow.verify(
+            event.getData(),
+            outdated,
+            player.getName(),
+            verified
         );
     }
 
     @EventHandler
     public void onLogin(
-            @NotNull
-            PostLoginEvent event
+        @NotNull
+        PostLoginEvent event
     ) {
         ProxiedPlayer player = event.getPlayer();
+        String playerName = player.getName();
         LoginPreparation preparation = LoginFlow.prepare(
-                outdated,
-                player.getName(),
-                (long) player.getPing()
+            outdated,
+            playerName,
+            player.getPing()
         );
 
-        preparation.service().scheduleWithFixedDelay(
+        try (ScheduledExecutorService service = preparation.service()) {
+            service.schedule(
                 () -> {
-                    preparation.service().shutdown();
+                    service.shutdown();
                     if (player.isConnected()) {
                         LoginCheckerAction action = LoginFlow.check(
-                                outdated,
-                                player.getName(),
-                                verified
+                            outdated,
+                            playerName,
+                            verified
                         );
 
                         switch (action) {
                             case LoginCheckerAction.Kick verdict ->
-                                    player.disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&', verdict.reason())));
-                            case LoginCheckerAction.SendToken verdict -> player.sendData(Channel.s2c, verdict.token().getBytes());
-                            case LoginCheckerAction.Pass ignored -> verified.remove(player.getName());
+                                player.disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&', verdict.reason())));
+                            case LoginCheckerAction.SendToken verdict ->
+                                player.sendData(Channel.s2c, verdict.token().getBytes());
+                            case LoginCheckerAction.Pass ignored -> verified.remove(playerName);
                         }
                     }
-                    outdated.remove(player.getName());
-                }, preparation.delay(), preparation.delay(), TimeUnit.MILLISECONDS
-        );
-    }
+                    outdated.remove(playerName);
+                }, preparation.delay(), TimeUnit.MILLISECONDS
+            );
+        }   }
 }

@@ -14,4 +14,23 @@ public class KickSettings {
     public String disabled = "&cYour token has been disabled!";
     @Nullable
     public String disabled_reason = "&cReason: %reason%";
+
+
+
+    @NotNull
+    public String parseMessage(
+        @NotNull
+        String name,
+        @NotNull
+        String reason
+    ) {
+        String msg = this.disabled;
+        assert msg != null;
+        if (!reason.isBlank()) {
+            msg += String.format("\n&r&f%s", this.disabled_reason);
+        }
+        return msg
+            .replace("%name%", name)
+            .replace("%reason%", String.format("&r&f%s", reason));
+    }
 }

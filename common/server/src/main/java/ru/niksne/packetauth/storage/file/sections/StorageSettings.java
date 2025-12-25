@@ -3,6 +3,7 @@ package ru.niksne.packetauth.storage.file.sections;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.niksne.packetauth.storage.StorageType;
+import ru.niksne.packetauth.storage.database.DatabaseManager;
 
 public class StorageSettings {
     @NotNull
@@ -21,8 +22,8 @@ public class StorageSettings {
     public String password = "PacketAuthPluginPassword1234";
 
     public void setStorageType(
-            @NotNull
-            String storageTypeStr
+        @NotNull
+        String storageTypeStr
     ) {
         this.mode = switch (storageTypeStr) {
             case "file" -> StorageType.File;
@@ -31,5 +32,29 @@ public class StorageSettings {
             case "postgresql" -> StorageType.PostgreSQL;
             default -> throw new IllegalArgumentException("Invalid storage type: " + storageTypeStr);
         };
+    }
+
+    @Nullable
+    public DatabaseManager checkStorageType() {
+        if (this.mode == StorageType.File) {
+            return null;
+        }
+
+        assert this.host != null
+                && this.port != null
+                && this.database_name != null
+                && this.table_name != null
+                && this.user != null
+                && this.password != null;
+
+        return new DatabaseManager(
+                this.mode,
+                this.host,
+                this.port,
+                this.database_name,
+                this.table_name,
+                this.user,
+                this.password
+        );
     }
 }

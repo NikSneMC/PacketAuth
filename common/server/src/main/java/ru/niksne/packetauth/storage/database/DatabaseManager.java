@@ -18,20 +18,19 @@ public class DatabaseManager {
     private final Logger logger = Logger.getLogger("Packet Auth");
 
     public DatabaseManager(
-            @NotNull
-            StorageType storageType,
-            @NotNull
-            String host,
-            @NotNull
-            Integer port,
-            @NotNull
-            String user,
-            @NotNull
-            String password,
-            @NotNull
-            String database,
-            @NotNull
-            String tokensTableName
+        @NotNull
+        StorageType storageType,
+        @NotNull
+        String host,
+        int port,
+        @NotNull
+        String user,
+        @NotNull
+        String password,
+        @NotNull
+        String database,
+        @NotNull
+        String tokensTableName
     ) {
         this.jdbcUrl = String.format("jdbc:%s://%s:%d/%s", storageType, host, port, database);
         this.user = user;
@@ -43,10 +42,10 @@ public class DatabaseManager {
     }
 
     public void createTable(
-            @NotNull
-            String tableName,
-            @NotNull
-            String valueKey
+        @NotNull
+        String tableName,
+        @NotNull
+        String valueKey
     ) {
         try (Connection connection = DriverManager.getConnection(jdbcUrl, user, password)) {
             PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS ? (name VARCHAR(16), ? VARCHAR(4096))");
@@ -55,15 +54,15 @@ public class DatabaseManager {
             statement.setString(2, valueKey);
 
             statement.execute();
-        } catch (SQLException e) {
-            raise(e);
+        } catch (SQLException exc) {
+            raise(exc);
         }
     }
 
     @Nullable
     public String getToken(
-            @NotNull
-            String playerName
+        @NotNull
+        String playerName
     ) {
         try (Connection connection = DriverManager.getConnection(jdbcUrl, user, password)) {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM ? WHERE name = ?");
@@ -74,18 +73,18 @@ public class DatabaseManager {
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) return resultSet.getString("token");
             }
-        } catch (SQLException e) {
-            raise(e);
+        } catch (SQLException exc) {
+            raise(exc);
             return null;
         }
         return null;
     }
 
     public void saveToken(
-            @NotNull
-            String playerName,
-            @NotNull
-            String token
+        @NotNull
+        String playerName,
+        @NotNull
+        String token
     ) {
         try (Connection connection = DriverManager.getConnection(jdbcUrl, user, password)) {
             PreparedStatement statement = connection.prepareStatement("INSERT INTO ? VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
@@ -95,19 +94,19 @@ public class DatabaseManager {
             statement.setString(3, token);
 
             statement.executeUpdate();
-        } catch (SQLException e) {
-            raise(e);
+        } catch (SQLException exc) {
+            raise(exc);
         }
     }
 
     @NotNull
     public Boolean hasRecord(
-            @NotNull
-            String tableName,
-            @NotNull
-            String key,
-            @NotNull
-            String value
+        @NotNull
+        String tableName,
+        @NotNull
+        String key,
+        @NotNull
+        String value
     ) {
         try (Connection connection = DriverManager.getConnection(jdbcUrl, user, password)) {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM ? WHERE ? = ?");
@@ -119,18 +118,18 @@ public class DatabaseManager {
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next();
             }
-        } catch (SQLException e) {
-            raise(e);
+        } catch (SQLException exc) {
+            raise(exc);
             return false;
         }
     }
 
     @NotNull
     public String getReason(
-            @NotNull
-            String tableName,
-            @NotNull
-            String playerName
+        @NotNull
+        String tableName,
+        @NotNull
+        String playerName
     ) {
         try (Connection connection = DriverManager.getConnection(jdbcUrl, user, password)) {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM ? WHERE name = ?");
@@ -139,19 +138,22 @@ public class DatabaseManager {
             statement.setString(2, playerName);
 
             try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) return resultSet.getString("reason")
+                if (resultSet.next()) {
+                    return resultSet
+                        .getString("reason")
                         .replace("\"\"", "");
+                }
             }
-        } catch (SQLException e) {
-            raise(e);
+        } catch (SQLException exc) {
+            raise(exc);
         }
         return "";
     }
 
     private void raise(
-            @NotNull
-            Exception e
+        @NotNull
+        Exception exception
     ) {
-        logger.log(Level.SEVERE, "Database error: ", e);
+        logger.log(Level.SEVERE, "Database error: ", exception);
     }
 }

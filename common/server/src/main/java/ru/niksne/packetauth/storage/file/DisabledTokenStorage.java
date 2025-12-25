@@ -13,16 +13,16 @@ public class DisabledTokenStorage {
 
     @NotNull
     public Boolean isTokenDisabledFor(
-            @NotNull
-            String name
+        @NotNull
+        String name
     ) {
         return disabled.containsKey(name);
     }
 
     @NotNull
     public String getTokenDisablingReason(
-            @NotNull
-            String name
+        @NotNull
+        String name
     ) {
         return disabled.getOrDefault(name, "");
     }

@@ -2,7 +2,7 @@ package ru.niksne.packetauth.storage;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.niksne.packetauth.Utils;
+import ru.niksne.packetauth.utils.Utils;
 import ru.niksne.packetauth.storage.database.DatabaseManager;
 import ru.niksne.packetauth.storage.file.ConfigStorage;
 import ru.niksne.packetauth.storage.file.DisabledTokenStorage;
@@ -22,8 +22,8 @@ public class ManagerWrapper {
     private static DatabaseManager databaseManager;
 
     public static void init(
-            @NotNull
-            Path dataFolder
+        @NotNull
+        Path dataFolder
     ) {
         configStorageManager = new StorageManager<>(ConfigStorage.class, dataFolder, "config");
 
@@ -79,8 +79,8 @@ public class ManagerWrapper {
     }
 
     public static void setDatabaseManager(
-            @Nullable
-            DatabaseManager databaseManager
+        @Nullable
+        DatabaseManager databaseManager
     ) {
         ManagerWrapper.databaseManager = databaseManager;
     }

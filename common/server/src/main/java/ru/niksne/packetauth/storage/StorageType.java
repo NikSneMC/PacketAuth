@@ -11,8 +11,8 @@ public enum StorageType {
     @NotNull
     private final String storageType;
     StorageType(
-            @NotNull
-            String storageType
+        @NotNull
+        String storageType
     ) {
         this.storageType = storageType;
     }
